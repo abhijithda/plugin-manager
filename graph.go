@@ -4,6 +4,7 @@
 package pm
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/VeritasOS/plugin-manager/config"
 	osutils "github.com/VeritasOS/plugin-manager/utils/os"
+	graphviz "github.com/goccy/go-graphviz"
 )
 
 // graph of plugin and its dependencies.
@@ -30,7 +32,7 @@ type graph struct {
 }
 
 var g graph
-var dotCmdPresent = true
+var gv = graphviz.New()
 
 func initGraphConfig(imgNamePrefix string) {
 	// Initialization should be done only once.
@@ -139,28 +141,23 @@ func generateGraph() error {
 		return writeerr
 	}
 
-	// https://graphviz.gitlab.io/_pages/doc/info/command.html
-	cmdStr := "dot"
-	// If cmdStr is not installed on system, then just return.
-	if !dotCmdPresent {
-		return nil
+	dotContents, readerr := ioutil.ReadFile(dotFile)
+	if readerr != nil {
+		log.Printf("ioutil.ReadFile(%s) Err: %s", dotFile, readerr.Error())
+		return readerr
 	}
-	cmdParams := []string{"-Tsvg", dotFile, "-o", svgFile}
-
-	cmd := osutils.ExecCommand(os.ExpandEnv(cmdStr), cmdParams...)
-	stdOutErr, err := cmd.CombinedOutput()
-	if err != nil {
-		if strings.Contains(err.Error(), "executable file not found in $PATH") {
-			dotCmdPresent = false
-			return nil
-		}
-		log.Printf("osutils.ExecCommand(%v, %v) Error: %s", cmd, cmdParams, err.Error())
+	graphContents, parseerr := graphviz.ParseBytes(dotContents)
+	if parseerr != nil {
+		log.Printf("graphviz.ParseBytes() Err: %s", parseerr.Error())
+		return readerr
 	}
-	if len(stdOutErr) != 0 {
-		log.Println("Stdout & Stderr:", string(stdOutErr))
+	rendererr := gv.RenderFilename(graphContents, graphviz.SVG, svgFile)
+	if rendererr != nil {
+		log.Printf("gv.RenderFilename() Err: %s", rendererr.Error())
+		return rendererr
 	}
 
-	return err
+	return nil
 }
 
 // getStatusColor returns the color for a given result status.
