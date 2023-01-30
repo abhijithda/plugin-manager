@@ -532,6 +532,7 @@ func Test_executePlugins(t *testing.T) {
 		psStatus     PluginsStatus
 	}
 
+	pluginType := "test"
 	tests := []struct {
 		name       string
 		pluginInfo Plugins
@@ -795,13 +796,14 @@ func Test_executePlugins(t *testing.T) {
 		},
 	}
 
-	initGraphConfig(config.GetPMLogFile())
 	for _, tt := range tests {
 		// Test Sequential as well as sequential execution
 		for _, tt.sequential = range []bool{false, true} {
 			t.Run(tt.name+fmt.Sprintf("(sequential=%v)", tt.sequential),
 				func(t *testing.T) {
 					npInfo := normalizePluginsInfo(tt.pluginInfo)
+					resetGraph()
+					initGraph(pluginType, npInfo)
 					var result PluginsStatus
 					res := executePlugins(&result, npInfo, tt.sequential)
 					// t.Logf("res: %+v, expected: %v", res, tt.want.returnStatus)
