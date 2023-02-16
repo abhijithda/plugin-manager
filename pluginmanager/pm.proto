@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "github.com/VeritasOS/plugin-manager/pluginmanager";
+
+package pluginmanager;
+
+service PM {
+	rpc Run(RunRequest) returns (RunResponse) {};
+}
+
+message RunRequest {
+	string type = 1;
+	string library = 2;
+    Log log = 3;
+	Output output = 4;
+}
+
+message Log {
+	string dir = 1;
+	string file = 2;
+}
+
+message Output {
+	string format = 1;
+	string file = 2;
+}
+
+message RunResponse {
+	string type = 1;
+	repeated PluginStatus Plugins = 2;
+	RunStates Status = 3;
+	string StdOutErr = 4;
+}
+
+message PluginAttributes {
+	string FileName = 1;
+	string Description = 2;
+	string ExecStart = 3;
+	repeated string RequiredBy = 4;
+	repeated string Requires = 5;
+}
+
+message PluginStatus {
+	PluginAttributes pluginAttributes = 1;
+	RunStates Status = 2;
+	string StdOutErr = 3;
+}
+
+enum RunStates {
+	Starting = 0;
+	Succeeded = 1;
+	Failed = 2;
+	Skipped = 3;
+}

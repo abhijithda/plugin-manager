@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/VeritasOS/plugin-manager/config"
+	pb "github.com/VeritasOS/plugin-manager/pluginmanager"
 )
 
 func Test_getStatusColor(t *testing.T) {
@@ -26,22 +27,22 @@ func Test_getStatusColor(t *testing.T) {
 	}{
 		{
 			name: "Start",
-			args: args{status: dStatusStart},
+			args: args{status: pb.RunStates_Starting.Enum().String()},
 			want: "blue",
 		},
 		{
 			name: "Ok/Pass",
-			args: args{status: dStatusOk},
+			args: args{status: pb.RunStates_Succeeded.Enum().String()},
 			want: "green",
 		},
 		{
 			name: "Fail",
-			args: args{status: dStatusFail},
+			args: args{status: pb.RunStates_Failed.Enum().String()},
 			want: "red",
 		},
 		{
 			name: "Skip",
-			args: args{status: dStatusSkip},
+			args: args{status: pb.RunStates_Skipped.Enum().String()},
 			want: "yellow",
 		},
 	}
@@ -79,7 +80,7 @@ func Test_updateGraph(t *testing.T) {
 			name: "Append a row",
 			args: args{
 				plugin: "A/a.test",
-				status: dStatusOk,
+				status: pb.RunStates_Succeeded.Enum().String(),
 				url:    "url/A/a.test",
 			},
 			wantErr: false,

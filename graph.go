@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/VeritasOS/plugin-manager/config"
+	pb "github.com/VeritasOS/plugin-manager/pluginmanager"
 	osutils "github.com/VeritasOS/plugin-manager/utils/os"
 )
 
@@ -48,7 +49,7 @@ func getDotFilePath() string {
 }
 
 // initGraph initliazes the graph data structure and invokes generateGraph.
-func initGraph(pluginType string, pluginsInfo map[string]*PluginAttributes) error {
+func initGraph(pluginType string, pluginsInfo map[string]*pb.PluginAttributes) error {
 	initGraphConfig(config.GetPMLogFile())
 
 	// DOT guide: https://graphviz.gitlab.io/_pages/pdf/dotguide.pdf
@@ -167,11 +168,11 @@ func generateGraph() error {
 func getStatusColor(status string) string {
 	// Node color
 	ncolor := "blue" // dStatusStart by default
-	if status == dStatusFail {
+	if status == pb.RunStates_Failed.String() {
 		ncolor = "red"
-	} else if status == dStatusOk {
+	} else if status == pb.RunStates_Succeeded.String() {
 		ncolor = "green"
-	} else if status == dStatusSkip {
+	} else if status == pb.RunStates_Skipped.String() {
 		ncolor = "yellow"
 	}
 	return ncolor
